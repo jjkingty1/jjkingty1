@@ -1,7 +1,7 @@
     -- made by JJ(JJ_Bytes)
     -- pls follow JJ_Bytes on roblox incase this helped!
     -- place this script inside serverscriptservice
-    -- pls follow JJ_Bytes on roblox incase this helped!
+    -- this script will send a notif to your discord webhook when a player joins/leaves!
 local HttpService = game:GetService("HttpService")
 
 -- Replace this with your Discord Webhook URL
