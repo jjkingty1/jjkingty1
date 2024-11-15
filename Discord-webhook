@@ -1,0 +1,74 @@
+    -- made by JJ(JJ_Bytes)
+    -- pls follow JJ_Bytes on roblox if this helped!
+local HttpService = game:GetService("HttpService")
+
+-- Replace this with your Discord Webhook URL
+local webhookURL = "YOUR_WEBHOOK_URL"
+
+-- Table to keep track of each player's join time
+local playerJoinTimes = {}
+
+-- Function to send an embedded message to Discord
+local function sendEmbedToDiscord(title, fields, avatarURL)
+    local data = {
+        ["username"] = "JoinLeave Logger",
+        ["avatar_url"] = "https://www.roblox.com/asset/?id=9186...", -- optional bot avatar
+        ["embeds"] = {{
+            ["title"] = title,
+            ["color"] = 0x00FF00, -- Green color, you can change this to any color in hex
+            ["thumbnail"] = {
+                ["url"] = avatarURL
+            },
+            ["fields"] = fields
+        }}
+    }
+
+    local jsonData = HttpService:JSONEncode(data)
+    HttpService:PostAsync(webhookURL, jsonData, Enum.HttpContentType.ApplicationJson)
+end
+
+-- Event for when a player joins
+game.Players.PlayerAdded:Connect(function(player)
+    -- Record the player's join time
+    playerJoinTimes[player.UserId] = tick()
+
+    -- Fetch player details
+    local username = player.Name
+    local userId = player.UserId
+    local accountAge = player.AccountAge
+    local avatarURL = "https://www.roblox.com/headshot-thumb..." .. userId .. "&width=150&height=150&format=png"
+
+    -- Create fields for the embed
+    local fields = {
+        {["name"] = "Username", ["value"] = username, ["inline"] = true},
+        {["name"] = "User ID", ["value"] = tostring(userId), ["inline"] = true},
+        {["name"] = "Account Age", ["value"] = tostring(accountAge) .. " days", ["inline"] = true}
+    }
+
+    -- Send join embed to Discord
+    sendEmbedToDiscord(username .. " has joined the game! 🎉", fields, avatarURL)
+end)
+
+-- Event for when a player leaves
+game.Players.PlayerRemoving:Connect(function(player)
+    local userId = player.UserId
+    local username = player.Name
+
+    -- Calculate time spent in the game
+    local joinTime = playerJoinTimes[userId] or tick()
+    local timeSpent = math.floor((tick() - joinTime) / 60) -- in minutes
+
+    -- Remove from the join times table
+    playerJoinTimes[userId] = nil
+
+    -- Create fields for the embed
+    local fields = {
+        {["name"] = "Username", ["value"] = username, ["inline"] = true},
+        {["name"] = "User ID", ["value"] = tostring(userId), ["inline"] = true},
+        {["name"] = "Account Age", ["value"] = tostring(player.AccountAge) .. " days", ["inline"] = true},
+        {["name"] = "Time Spent", ["value"] = tostring(timeSpent) .. " minutes", ["inline"] = true}
+    }
+
+    -- Send leave embed to Discord
+    sendEmbedToDiscord(username .. " has left the game. 👋", fields, "https://www.roblox.com/headshot-thumb..." .. userId .. "&width=150&height=150&format=png")
+end)
